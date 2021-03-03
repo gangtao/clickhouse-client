@@ -1,0 +1,66 @@
+version: "3.7"
+services:
+  redis:
+    container_name: redis
+    image: redis:3-alpine
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+  postgres:
+    container_name: postgres
+    image: postgres:9.5-alpine
+    ports:
+      - "15432:5432"
+    command: "postgres -c fsync=off -c full_page_writes=off -c synchronous_commit=OFF"
+    restart: unless-stopped
+    environment:
+      - POSTGRES_HOST_AUTH_METHOD=trust
+  server:
+    container_name: server
+    image: redash/redash
+    depends_on:
+      - postgres
+      - redis
+    ports:
+      - "5000:5000"
+      - "5678:5678"
+    environment:
+      - REDASH_LOG_LEVEL=INFO
+      - REDASH_REDIS_URL=redis://redis:6379/0
+      - REDASH_DATABASE_URL=postgresql://postgres@postgres/postgres
+      - REDASH_RATELIMIT_ENABLED=false
+      - REDASH_MAIL_DEFAULT_SENDER=redash@example.com
+      - REDASH_MAIL_SERVER=email
+  scheduler:
+    container_name: scheduler
+    image: redash/redash
+    command: scheduler
+    depends_on:
+      - server
+    environment:
+      - REDASH_LOG_LEVEL=INFO
+      - REDASH_REDIS_URL=redis://redis:6379/0
+      - REDASH_DATABASE_URL=postgresql://postgres@postgres/postgres
+      - REDASH_RATELIMIT_ENABLED=false
+      - REDASH_MAIL_DEFAULT_SENDER=redash@example.com
+      - REDASH_MAIL_SERVER=email
+  worker:
+    container_name: worker
+    image: redash/redash
+    command: dev_worker
+    depends_on:
+      - server
+    environment:
+      - REDASH_LOG_LEVEL=INFO
+      - REDASH_REDIS_URL=redis://redis:6379/0
+      - REDASH_DATABASE_URL=postgresql://postgres@postgres/postgres
+      - REDASH_RATELIMIT_ENABLED=false
+      - REDASH_MAIL_DEFAULT_SENDER=redash@example.com
+      - REDASH_MAIL_SERVER=email
+      - PYTHONUNBUFFERED=0
+  email:
+    container_name: email
+    image: djfarrelly/maildev
+    ports:
+      - "1080:80"
+    restart: unless-stopped
