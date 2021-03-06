@@ -1,0 +1,14 @@
+version: "3.7"
+services:
+  superset:
+    container_name: superset
+    image: naughtytao/superset:0.1
+    ports:
+      - "8088:8088"
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 2048M
+        reservations:
+          memory: 2048M

@@ -1,0 +1,14 @@
+version: "3.7"
+services:
+  metabase:
+    container_name: metabase
+    image: naughtytao/metabase:0.1
+    ports:
+      - "3000:3000"
+    deploy:
+      resources:
+        limits:
+          cpus: '1'
+          memory: 2048M
+        reservations:
+          memory: 2048M

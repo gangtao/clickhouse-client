@@ -1,33 +1,5 @@
 version: "3.7"
 services:
-  clickhouse:
-    container_name: clickhouse
-    image: yandex/clickhouse-server
-    volumes:
-      - ./data/config:/var/lib/clickhouse
-    ports:
-      - "8123:8123"
-      - "9000:9000"
-      - "9009:9009"
-      - "9004:9004"
-    ulimits:
-      nproc: 65535
-      nofile:
-        soft: 262144
-        hard: 262144
-    healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "localhost:8123/ping"]
-      interval: 30s
-      timeout: 5s
-      retries: 3
-    deploy:
-      resources:
-        limits:
-          cpus: '4'
-          memory: 4096M
-        reservations:
-          memory: 4096M
-  
   sqlpad:
     container_name: sqlpad
     image: sqlpad/sqlpad:latest
@@ -36,8 +8,6 @@ services:
       - SQLPAD_ADMIN_PASSWORD=admin
     ports:
       - "3000:3000"
-    depends_on:
-      - daisyserver
     deploy:
       resources:
         limits:
